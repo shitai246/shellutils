@@ -85,7 +85,7 @@ function errCheck() {
 
 #### LockFile Checker
 _SCRIPT=`basename $0`
-_LOCKFILE="/tmp/.${_SCRIPT}.lock"
+_LOCKFILE="/tmp/.`basename $0 .sh`.lock"
 
 ## checkLockFile()
 # ロックファイルの有無をチェックする。

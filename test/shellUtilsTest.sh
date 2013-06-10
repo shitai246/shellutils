@@ -49,12 +49,12 @@ testLogFatal() {
 
 testCheckLockFile() {
   checkLockFile
-  PID=`cat /tmp/.shellUtilsTest.sh.lock`
+  PID=`cat /tmp/.shellUtilsTest.lock`
   assertEquals ${PID} $$
   RET=`checkLockFile`
   assertEquals $? 1
   removeLockFile
-  test -f /tmp/.shellUtilsTest.sh.lock 2> /dev/null
+  test -f /tmp/.shellUtilsTest.lock 2> /dev/null
   assertEquals $? 1
 }
 
