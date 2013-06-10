@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# checkLockFile で作成されたロックファイルを削除する
+#
+# ロックファイル名は /tmp/.{呼出し元のスクリプト名}.lock とする
+#
+_PID=${$}
+_PPID=`ps -o ppid -p ${_PID} | tail -1`
+_PCOMM=`ps -o comm -p ${_PPID} | tail -1`
+_COMM_LENGTH=`expr ${#_PCOMM} + 2`
+_PCMD=`ps -o command -p ${_PPID} | tail -1 | cut -c ${_COMM_LENGTH}- | awk '{print $1}'`
+
+_LOCKFILE="/tmp/.`basename ${_PCMD}`.lock"
+
+rm ${_LOCKFILE}
+
