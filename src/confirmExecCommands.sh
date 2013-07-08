@@ -24,6 +24,9 @@ fi
 _logFile=${_commandFile}.log
 _TEE="tee -a ${_logFile}"
 
+# yes に相当するキー配列
+_yesKey=("y" "u" "o" "i" "p")
+
 #### confirmExecCommand
 # 渡された引数すべてをひとつのコマンドとし、
 # 標準入力にて実行確認をとって実行する。
@@ -31,14 +34,15 @@ _TEE="tee -a ${_logFile}"
 function confirmExecCommand() {
   command=${*}
   key=""
-  while [ "${key}" != "y" -a "${key}" != "e" -a "${key}" != "s" ]
+  yesKey=`getRandomYesKey`
+  while [ "${key}" != "${yesKey}" -a "${key}" != "e" -a "${key}" != "s" ]
   do
     echo "execute? : ${command}"
-    echo -n "(y):yes, (s):skip, (e):exit > "
+    echo -n "(${yesKey}):yes, (s):skip, (e):exit > "
     read key
   done
 
-  if [ "${key}" == "y" ]; then
+  if [ "${key}" == "${yesKey}" ]; then
     echo "execute : ${command} " | ${_TEE}
     __RESULT=`${command}`
     __RET=${?}
@@ -51,6 +55,11 @@ function confirmExecCommand() {
     echo "skip : ${command}" | ${_TEE}
     return 0
   fi
+}
+
+function getRandomYesKey() {
+  random=$((RANDOM % ${#_yesKey[*]}))
+  echo ${_yesKey[${random}]}
 }
 
 ### 以下メイン処理
