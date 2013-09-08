@@ -1,0 +1,76 @@
+#!/bin/sh
+
+##
+# ファイルをバックアップするスクリプト
+#
+
+# usage
+function usage() {
+  echo "Usage : あとで書く"
+}
+
+## 普通の処理
+function _bkup_func() {
+  if [ "${_EXT_F}" == "TRUE" ]; then
+    _BKUP_FILENAME="${_FILENAME}.`date '+%Y%m%d%H'`.${_EXT_V}"
+  else
+    _BKUP_FILENAME="${_FILENAME}.`date '+%Y%m%d%H'`"
+  fi
+
+  if [ -f ${_BKUP_FILENAME} ]; then
+    _BK_CNT=`ls ${_BKUP_FILENAME}* | wc -l`
+    _BKUP_FILENAME=${_BKUP_FILENAME}.${_BK_CNT}
+  fi
+
+  ${_CMD} ${_FILENAME} ${_BKUP_FILENAME}
+  return $?
+}
+
+function _undo_func() {
+  if [ ! -f ${_FILENAME}.[0-9][0-9][0-9][0-9][0,1][0-9][0-3][0-9][0-2][0-9] ]; then
+    usage
+    exit 3
+  fi
+  _UNDO_FILE=`ls ${_FILENAME}.[0-9][0-9][0-9][0-9][0,1][0-9][0-3][0-9][0-2][0-9]* | tail -n1`
+  ${_CMD} ${_UNDO_FILE} ${_FILENAME}
+}
+
+## メイン処理
+# オプション解析
+while getopts me:u OPT
+do
+  case $OPT in
+    "m" ) _MV_F="TRUE" ;;
+    "e" ) _EXT_F="TRUE" ; _EXT_V="${OPTARG}" ;;
+    "u" ) _UNDO_F="TRUE" ;;
+  esac
+done
+
+shift `expr $OPTIND - 1`
+
+# 第一引数のチェック
+_FILENAME=${1}
+if [ "${_FILENAME}" == "" ]; then
+  usage
+  exit 1
+fi
+if [ ! -f ${_FILENAME} ]; then
+  usage
+  exit 2
+fi
+
+# メイン処理
+if [ "${_MV_F}" == "TRUE" ]; then
+  _CMD="mv"
+else
+  _CMD="cp"
+fi
+
+if [ "${_UNDO_F}" == "TRUE" ]; then
+  _undo_func
+  exit $?
+else
+  _bkup_func
+  exit $?
+fi
+
