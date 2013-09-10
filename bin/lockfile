@@ -1,0 +1,59 @@
+#!/bin/sh
+
+# ロックファイルの有無をチェックする。
+# ロックファイルがあればファイルに記載された値のプロセスがあるか確認し、
+# プロセスがあればロックが有効とし処理を終了する。
+# ロックが有効でないときは、自分のプロセスIDをロックファイルに書き出す。
+#
+# ロックファイル名は /tmp/.{呼出し元のスクリプト名}.lock とする
+#
+
+# usage
+function usage() {
+  echo "Usage : あとで書く"
+}
+
+## メイン処理
+# オプション解析
+while getopts crf: OPT
+do
+  case $OPT in
+    "c" ) _CHECK_F="TRUE" ;;
+    "r" ) _REMOVE_F="TRUE" ;;
+    "f" ) _LOCK_F="TRUE" ; _LOCKFILENAME="${OPTARG}" ;;
+  esac
+done
+
+
+_PID=${$}
+_PPID=`ps -o ppid -p ${_PID} | tail -1`
+_PCOMM=`ps -o comm -p ${_PPID} | tail -1`
+_COMM_LENGTH=`expr ${#_PCOMM} + 2`
+_PCMD=`ps -o command -p ${_PPID} | tail -1 | cut -c ${_COMM_LENGTH}- | awk '{print $1}'`
+
+if [ "${_LOCK_F}" == "TRUE" ]; then
+  _LOCKFILE="/tmp/.${_LOCKFILENAME}"
+else
+  _LOCKFILE="/tmp/.`basename ${_PCMD}`.lock"
+fi
+
+if [ "${_CHECK_F}" == "TRUE" ]; then
+  if [ -f ${_LOCKFILE} ]; then
+    _LOCK_PID=`cat ${_LOCKFILE}`
+    kill -0 ${_LOCK_PID} 2> /dev/null
+    if [ "$?" == "0" ]; then
+      echo "logWarn ${_SCRIPT} is running."
+      kill -9 ${_PPID}
+      exit 1;
+    fi
+  fi
+  echo ${_PPID} > ${_LOCKFILE}
+elif [ "${_REMOVE_F}" == "TRUE" ]; then
+  rm -f ${_LOCKFILE}
+else
+  usage
+  exit 2;
+fi
+
+exit 0;
+
