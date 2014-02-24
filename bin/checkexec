@@ -6,6 +6,7 @@
 # # で始まる行はコメント行として標準出力する。
 # 
 
+# usage
 function usage() {
   echo "Usage : ${0} [commandFile]"
   echo ""
@@ -46,22 +47,22 @@ function confirmExecCommand() {
   yesKey=`getRandomYesKey`
   while [ "${key}" != "${yesKey}" -a "${key}" != "e" -a "${key}" != "s" ]
   do
-    echo "execute? : ${command}"
-    echo -n "(${yesKey}):yes, (s):skip, (e):exit > "
+    echo -e "\e[35m execute? :\e[m ${command}"
+    echo -en "\e[36m (${yesKey}):yes, (s):skip, (e):exit\e[34m > \e[m"
     read key
   done
 
   if [ "${key}" == "${yesKey}" ]; then
-    echo "execute : ${command} " | ${_TEE}
+    echo -e "\e[34m execute : ${command} \e[m" | ${_TEE}
     __RESULT=`${command}`
     __RET=${?}
     echo "${__RESULT}" | ${_TEE}
     return ${__RET}
   elif [ "${key}" == "e" ]; then
-    echo "exit : ${command}" | ${_TEE}
+    echo -e "\e[31m exit : ${command} \e[m" | ${_TEE}
     return 255
   elif [ "${key}" == "s" ]; then
-    echo "skip : ${command}" | ${_TEE}
+    echo -e "\e[33m skip : ${command} \e[m" | ${_TEE}
     return 0
   fi
 }
@@ -85,13 +86,14 @@ do
   IFS=${IFS_BACKUP}
 
   if [ ${command:0:1} == "#" ]; then
-    echo "message : ${command:1}" | ${_TEE}
+    echo -e "\e[4;32m ${command}\e[m" | ${_TEE}
   else
     confirmExecCommand ${command}
     _RET=${?}
     if [ "${_RET}" != "0" ]; then
       if [ "${_RET}" != "255" ]; then
-        echo "Error : ${command} , ReturnCode : ${_RET}" | ${_TEE}
+        echo -e "\e[7;31m Error : ${command} , ReturnCode : ${_RET} \e[m" | ${_TEE}
+
       fi
       break;
     fi
