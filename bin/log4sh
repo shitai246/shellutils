@@ -69,6 +69,9 @@ function logFatal() {
 # エラーハンドリングを行う。
 # 直前に実行したコマンドのリターンコードが0ではないとき、
 # プログラムを終了する。
+# 第1引数にエラーメッセージ
+# 第2引数にエラー時のリターンコードを設定できる。
+# リターンコード省略時には直前のコマンドのリターンコードが利用される。
 #
 ## 使い方
 # command || errCheck
@@ -77,36 +80,11 @@ function errCheck() {
   _RET=$?
   if [ "${_RET}" != "0" ]; then
     # error
-    logError "return code : ${_RET}"
+    if [ "${2}" == "" ]; then
+      _RET=${2}
+    fi
+    logError "${1} : ${_RET}"
     exit 1;
   fi
-}
-
-
-#### LockFile Checker
-_SCRIPT=`basename $0`
-_LOCKFILE="/tmp/.`basename $0 .sh`.lock"
-
-## checkLockFile()
-# ロックファイルの有無をチェックする。
-# ロックファイルがあればファイルに記載された値のプロセスがあるか確認し、
-# プロセスがあればロックが有効とし処理を終了する。
-# ロックが有効でないときは、自分のプロセスIDをロックファイルに書き出す。
-#
-# ロックファイル名は /tmp/.{呼出し元のスクリプト名}.lock とする
-#
-function checkLockFile() {
-  if [ -f ${_LOCKFILE} ]; then
-    _PID=`cat ${_LOCKFILE}`
-    kill -0 ${_PID} && logWarn "${_SCRIPT} is running." && exit 1;
-  fi
-  echo $$ > ${_LOCKFILE}
-}
-
-## removeLockFile()
-# ロックファイルを削除する。
-# 
-function removeLockFile() {
-  rm ${_LOCKFILE}
 }
 

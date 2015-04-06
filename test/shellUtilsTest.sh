@@ -1,6 +1,6 @@
 #! /bin/sh
 
-. ../src/shellutils.sh
+. ../bin/log4sh
 
 testErrCheck() {
   cd ./notExistDir 2> /dev/null
@@ -48,12 +48,10 @@ testLogFatal() {
 }
 
 testCheckLockFile() {
-  checkLockFile
-  PID=`cat /tmp/.shellUtilsTest.lock`
+  ../bin/lockfile -c
+  PID=`cat /tmp/.shellUtilsTest.sh.lock`
   assertEquals ${PID} $$
-  RET=`checkLockFile`
-  assertEquals $? 1
-  removeLockFile
+  ../bin/lockfile -r
   test -f /tmp/.shellUtilsTest.lock 2> /dev/null
   assertEquals $? 1
 }

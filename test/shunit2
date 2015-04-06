@@ -829,18 +829,18 @@ _shunit_generateReport()
       && _shunit_skipped_="skipped=${__shunit_assertsSkipped}"
 
   if [ ${_shunit_ok_} -eq ${SHUNIT_TRUE} ]; then
-      _shunit_msg_='\x1B[32mOK\x1B[m'
+      _shunit_msg_='\e[32mOK\x1B[m'
     [ -n "${_shunit_skipped_}" ] \
         && _shunit_msg_="${_shunit_msg_} (${_shunit_skipped_})"
   else
-    _shunit_msg_="\x1B[31mFAILED (${_shunit_failures_}"
+    _shunit_msg_="\e[31mFAILED (${_shunit_failures_}"
     [ -n "${_shunit_skipped_}" ] \
         && _shunit_msg_="${_shunit_msg_},${_shunit_skipped_}"
-    _shunit_msg_="${_shunit_msg_})\x1B[m"
+    _shunit_msg_="${_shunit_msg_})\e[m"
   fi
 
   echo
-  echo ${_shunit_msg_}
+  echo -e ${_shunit_msg_}
   __shunit_reportGenerated=${SHUNIT_TRUE}
 
   unset _shunit_failures_ _shunit_msg_ _shunit_ok_ _shunit_skipped_
